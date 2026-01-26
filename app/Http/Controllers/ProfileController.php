@@ -91,7 +91,7 @@ class ProfileController extends Controller
         $request->validate([
             'document_type' => 'required|in:KTP,SIM,NPWP,KTM,KTA,SELFIE_KTP_SIM',
             'document_number' => 'nullable|string|max:50',
-            'document_file' => 'required|image|mimes:jpeg,png,jpg|max:2048',
+            'document_file' => 'required|image|mimes:jpeg,png,jpg|max:6048',
         ]);
 
         $user = Auth::user();

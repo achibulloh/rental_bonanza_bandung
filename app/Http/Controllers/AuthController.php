@@ -7,85 +7,264 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rules;
 use App\Models\User;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Session;
 
 class AuthController extends Controller
 {
-    // Login
-    public function login(){
-        return view("auth.login");
+    // --- 1. FUNGSI FORMAT HP (SANGAT PENTING) ---
+    // Fungsi ini memastikan nomor selalu berawalan 628...
+    // Contoh: 0812 -> 62812, +62812 -> 62812, 812 -> 62812
+    private function formatPhone($phone)
+    {
+        // 1. Hapus semua karakter selain angka
+        $phone = preg_replace('/[^0-9]/', '', $phone);
+
+        // 2. Cek awalan
+        if (substr($phone, 0, 2) === '08') {
+            return '62' . substr($phone, 1);
+        }
+        elseif (substr($phone, 0, 3) === '628') {
+            return $phone; // Sudah benar
+        }
+        elseif (substr($phone, 0, 1) === '8') {
+            return '62' . $phone;
+        }
+
+        return $phone; // Kembalikan apa adanya jika format lain
     }
 
-    // Prosses Auth Login
-    public function auth_prosses_login(Request $request){// 1. Validasi Input (Security: Input Sanitization)
+    // Ambil Settingan WA
+    private function getWaSettings()
+    {
+        return DB::table('settings')
+                ->whereIn('key', ['wa_gateway', 'wa_user_code', 'wa_device_id', 'wa_secret'])
+                ->pluck('value', 'key');
+    }
+
+    // --- VIEW AUTH ---
+    public function login(){ return view("auth.login"); }
+    public function register(){ return view("auth.register"); }
+
+    // --- 2. PROSES REGISTER ---
+    public function auth_prosses_register(Request $request){
+        // 1. Validasi Input
+        $validatedData = $request->validate([
+            'name'      => ['required', 'string', 'max:255'],
+            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users'],
+            'phone'     => ['required', 'numeric', 'digits_between:10,15'],
+            'password'  => ['required', 'confirmed', Rules\Password::defaults()],
+            'terms'     => ['accepted'],
+        ]);
+
+        try {
+            $formattedPhone = $this->formatPhone($validatedData['phone']);
+
+            // 2. Cek Config WA Dulu Sebelum Buat User
+            $waConfig = $this->getWaSettings();
+
+            // Jika Config Kosong/Gateway Mati, langsung tolak (opsional)
+            if (!isset($waConfig['wa_gateway']) || $waConfig['wa_gateway'] != '1') {
+                toastr()->error('Sistem Registrasi sedang sibuk/maintenance.', 'Maaf');
+                return back()->withInput();
+            }
+
+            // 3. Simpan User (Sementara)
+            $user = User::create([
+                'name' => $validatedData['name'],
+                'email' => $validatedData['email'],
+                'phone' => $formattedPhone,
+                'password' => Hash::make($validatedData['password']),
+                'role_id' => 4,
+                'is_active' => 0
+            ]);
+
+            // 4. Request Generate OTP
+            $response = Http::post('https://api.kirimi.id/v1/generate-otp', [
+                'user_code' => $waConfig['wa_user_code'],
+                'device_id' => $waConfig['wa_device_id'],
+                'phone'     => $formattedPhone,
+                'secret'    => $waConfig['wa_secret']
+            ]);
+
+            $result = $response->json();
+
+            // 5. Cek Berhasil atau Gagal
+            if ($response->successful() && isset($result['success']) && $result['success'] == true) {
+                // BERHASIL: Lanjut ke Halaman Verifikasi
+                Session::put('verification_phone', $formattedPhone);
+                toastr()->success('Kode OTP terkirim ke WhatsApp!', 'Berhasil');
+                return redirect()->route('otp.verify');
+            } else {
+                // GAGAL (Mungkin Limit Habis, Device Mati, dll)
+
+                // Ambil pesan error dari API (Contoh: "Customer ini sudah meminta OTP...")
+                $pesanError = $result['message'] ?? 'Gagal mengirim OTP. Coba lagi nanti.';
+
+                // Hapus user agar bisa daftar ulang nanti
+                $user->delete();
+
+                // Tampilkan notifikasi error ke user
+                toastr()->error($pesanError, 'Gagal');
+                return back()->withInput();
+            }
+
+        } catch (\Exception $e) {
+            // Hapus user jika error sistem
+            if(isset($user)) $user->delete();
+
+            toastr()->error('Terjadi kesalahan sistem.', 'Error');
+            return back()->withInput();
+        }
+    }
+
+    // --- 3. LOGIN (CEK AKTIF) ---
+    public function auth_prosses_login(Request $request)
+    {
         $validate = $request->validate([
             'email' => ['required', 'email'],
             'password' => ['required'],
         ]);
 
-        // 2. Cek Login
-        // Auth::attempt otomatis melakukan hashing password verification (Security)
-        if (Auth::attempt($validate)) {
+        $user = User::where('email', $request->email)->first();
 
-            // 3. Regenerasi Session (Security: Mencegah Session Fixation)
-            $request->session()->regenerate();
+        if ($user && Hash::check($request->password, $user->password)) {
 
-            return redirect()->intended('dashboard');
+            // CEK APAKAH SUDAH AKTIF
+            if ($user->is_active == 0) {
+                // Jika belum aktif, kirim ulang OTP
+                $this->resendOtpForLogin($user);
+                return redirect()->route('otp.verify');
+            }
+
+            if (Auth::attempt($validate)) {
+                $request->session()->regenerate();
+                return redirect()->intended('dashboard');
+            }
         }
 
-        // ERROR TOAST
-        // Jika login gagal
-        toastr()->error('An error has occurred please try again later.', 'Login Gagal');
-
-        // Kembalikan ke halaman login dengan error pada input
-        return back()->withErrors([
-            'email' => 'Email atau password yang Anda masukkan salah.',
-        ])->onlyInput('email');
+        toastr()->error('Email atau password salah.');
+        return back()->onlyInput('email');
     }
 
-    // Register
-    public function register(){
-        return view("auth.register");
-    }
+    // Fungsi bantuan kirim ulang saat login
+    private function resendOtpForLogin($user) {
+        $waConfig = $this->getWaSettings();
+        if (isset($waConfig['wa_gateway']) && $waConfig['wa_gateway'] == '1') {
+            // Pastikan format nomor HP user benar
+            $phone = $this->formatPhone($user->phone);
 
-    // Prosses Auth Register
-    public function auth_prosses_register(Request $request){
-        // 1. Validasi Input (Security Layer 1)
-        $validatedData = $request->validate([
-            'name'      => ['required', 'string', 'max:255'],
-            'email'     => ['required', 'string', 'email', 'max:255', 'unique:users'], // Unique mencegah duplikasi
-            'phone'     => ['required', 'numeric', 'digits_between:10,15'], // Validasi nomor hp
-            'password'  => ['required', 'confirmed', Rules\Password::defaults()], // Confirmed mencocokkan dengan password_confirmation
-            'terms'     => ['accepted'], // Wajib dicentang
-        ], [
-            'name.required' => 'Nama lengkap wajib diisi.',
-            'email.unique'  => 'Email ini sudah terdaftar.',
-            'password.confirmed' => 'Konfirmasi password tidak cocok.',
-            'terms.accepted' => 'Anda harus menyetujui syarat & ketentuan.'
-        ]);
-
-        try {
-            // 2. Simpan User ke Database (Security Layer 2: Hashing)
-            $user = User::create([
-                'name' => $validatedData['name'],
-                'email' => $validatedData['email'],
-                'phone' => $validatedData['phone'],
-                'password' => Hash::make($validatedData['password']), // Hash password!
-                'role_id' => 4,
+            Http::post('https://api.kirimi.id/v1/generate-otp', [
+                'user_code' => $waConfig['wa_user_code'],
+                'device_id' => $waConfig['wa_device_id'],
+                'phone'     => $phone,
+                'secret'    => $waConfig['wa_secret']
             ]);
 
-            // Opsional: Langsung login setelah daftar
-            // Auth::login($user);
+            Session::put('verification_phone', $phone);
+            toastr()->warning('Akun belum aktif. Kode OTP baru dikirim.', 'Verifikasi');
+        }
+    }
 
-            // 3. Notifikasi Sukses dengan Toastr
-            toastr()->success('Akun berhasil dibuat! Silakan login.', 'Registrasi Berhasil');
+    // --- 4. TAMPILAN VERIFIKASI ---
+    public function showVerifyOtp()
+    {
+        if (!Session::has('verification_phone')) {
+            return redirect()->route('login')->with('error', 'Sesi habis.');
+        }
+        return view('auth.verify-otp');
+    }
 
-            // Redirect ke halaman login
-            return redirect()->route('login');
+    // --- 5. PROSES VALIDASI OTP (FIXED) ---
+    public function processVerifyOtp(Request $request)
+    {
+        $request->validate(['otp' => 'required']);
+
+        // Ambil HP dari session dan FORMAT ULANG (PENTING!)
+        $sessionPhone = Session::get('verification_phone');
+        $phone = $this->formatPhone($sessionPhone);
+
+        // Cari User (Gunakan phone yang sudah diformat)
+        $user = User::where('phone', $phone)->first();
+
+        if (!$user) {
+            toastr()->error('User tidak ditemukan. HP: ' . $phone, 'Error');
+            return back();
+        }
+
+        $waConfig = $this->getWaSettings();
+
+        try {
+            // KIRIM VALIDASI KE API
+            // Pastikan 'phone' sama persis dengan saat register
+            $response = Http::post('https://api.kirimi.id/v1/validate-otp', [
+                'user_code' => $waConfig['wa_user_code'],
+                'device_id' => $waConfig['wa_device_id'],
+                'phone'     => $phone, // Format 62...
+                'otp'       => (string) $request->otp, // Pastikan string
+                'secret'    => $waConfig['wa_secret']
+            ]);
+
+            $result = $response->json();
+
+            // Cek sukses
+            $isSuccess = false;
+            if ($response->successful()) {
+                if ((isset($result['success']) && $result['success'] == true) ||
+                    (isset($result['data']['verified']) && $result['data']['verified'] == true)) {
+                    $isSuccess = true;
+                }
+            }
+
+            if ($isSuccess) {
+                // UPDATE KE DB
+                $user->update(['is_active' => 1]);
+
+                Session::forget('verification_phone');
+                Auth::login($user);
+
+                toastr()->success('Verifikasi Berhasil!', 'Sukses');
+                return redirect()->intended('dashboard');
+            } else {
+                $msg = $result['message'] ?? 'Kode OTP salah.';
+                toastr()->error($msg, 'Gagal');
+                return back();
+            }
 
         } catch (\Exception $e) {
-            // Jika terjadi error database dsb
-            toastr()->error('Terjadi kesalahan saat mendaftar. Coba lagi.', 'Error');
-            return back()->withInput();
+            toastr()->error('Koneksi Error.', 'Error');
+            return back();
+        }
+    }
+
+    // --- 6. KIRIM ULANG (RESEND) ---
+    public function resendOtp()
+    {
+        if (!Session::has('verification_phone')) {
+            return redirect()->route('login');
+        }
+
+        $phone = $this->formatPhone(Session::get('verification_phone'));
+        $waConfig = $this->getWaSettings();
+
+        try {
+            $response = Http::post('https://api.kirimi.id/v1/generate-otp', [
+                'user_code' => $waConfig['wa_user_code'],
+                'device_id' => $waConfig['wa_device_id'],
+                'phone'     => $phone,
+                'secret'    => $waConfig['wa_secret']
+            ]);
+
+            if ($response->successful()) {
+                toastr()->success('Kode OTP baru terkirim.', 'Sukses');
+            } else {
+                toastr()->error('Gagal kirim ulang.', 'Gagal');
+            }
+            return back();
+
+        } catch (\Exception $e) {
+            return back()->with('error', 'Error koneksi.');
         }
     }
 }

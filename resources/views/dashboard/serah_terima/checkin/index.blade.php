@@ -430,8 +430,6 @@
 @endsection
 
 @section('content')
-    <main class="main-content">
-
         {{-- Form Start --}}
         <form action="{{ route('serah_terima.store_checkin', $booking->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
@@ -693,7 +691,6 @@
             </div>
 
         </form>
-    </main>
     <div id="signatureModal" class="custom-modal">
         <div class="custom-modal-content">
             <div class="modal-header">

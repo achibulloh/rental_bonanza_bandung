@@ -155,11 +155,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
-    <div class="mobile-header">
-        <a href="#" style="color:var(--text-dark); font-weight:700; text-decoration:none;">Bonanza Rental</a>
-        <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-    </div>
 
     <div style="margin-bottom: 20px;">
         <h1 style="font-size:24px; font-weight:700;">Manajemen Armada</h1>
@@ -479,8 +474,6 @@
             </div>
         </div>
     @endcan
-
-</main>
 
 <div id="modalAddCar" class="modal-overlay">
     <div class="modal-box modal-lg">

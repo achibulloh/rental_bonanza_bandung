@@ -28,6 +28,7 @@ class User extends Authenticatable
         'password',// <--- Pastikan ini ada
         'google_id',  // <--- Pastikan ini ada
         'role_id',    // <--- WAJIB ADA DI SINI AGAR BISA DISIMPAN
+        'is_active',
     ];
 
     /**
@@ -81,5 +82,19 @@ class User extends Authenticatable
     public function officerOut()
     {
         return $this->belongsTo(User::class, 'officer_id_out');
+    }
+    public function activeTransaction()
+    {
+        // Pastikan Anda sudah membuat Model Booking (App\Models\Booking)
+        // Kita cek berdasarkan 'driver_id'
+        return $this->hasOne(Booking::class, 'driver_id')
+                    ->whereIn('status', ['approved', 'ongoing']) // Status yang dianggap sibuk
+                    ->latest();
+    }
+
+    // Opsional: Jika ingin melihat histori semua tugas driver
+    public function driverTransactions()
+    {
+        return $this->hasMany(Booking::class, 'driver_id');
     }
 }

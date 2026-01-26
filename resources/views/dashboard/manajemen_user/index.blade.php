@@ -144,12 +144,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
-
-    <div class="mobile-header" style="display:none; justify-content:space-between; margin-bottom:20px;">
-        <a href="/" style="font-weight:700; color:#333; text-decoration:none;">Bonanza</a>
-        <div onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-    </div>
 
     @if(session('success'))
         <div style="background: #e6fcf5; color: #0ca678; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -264,8 +258,6 @@
             </div>
         </div>
     </div>
-
-</main>
 
 <div id="modalAddUser" class="modal-overlay">
     <div class="modal-box">

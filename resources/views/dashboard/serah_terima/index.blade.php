@@ -89,8 +89,6 @@
 
 @section('content')
 
-    <main class="main-content">
-
         <div class="page-header">
             <h1>Serah Terima Kendaraan (Hari Ini)</h1>
             <p>
@@ -313,8 +311,6 @@
             </div>
 
         </div>
-
-    </main>
 @endsection
 
 @section('script')

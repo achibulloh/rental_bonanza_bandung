@@ -18,6 +18,7 @@ class RouteSeeder extends Seeder
             // ================== 1. HALAMAN UTAMA (GET) ==================
             ['url' => '/dashboard', 'controller' => 'DashboardController@index', 'route_name' => 'dashboard', 'method' => 'GET'],
             ['url' => '/manajemen-akses', 'controller' => 'AccessControlController@index', 'route_name' => 'manajemen_akses', 'method' => 'GET'], // Updated Controller
+            ['url' => '/menus/reorder', 'controller' => 'AccessControlController@reorder', 'route_name' => 'menus.reorder', 'method' => 'POST'],
             ['url' => '/manajemen-user', 'controller' => 'UserManagementController@index', 'route_name' => 'users.index', 'method' => 'GET'],
             ['url' => '/users', 'controller' => 'UserManagementController@store', 'route_name' => 'users.store', 'method' => 'POST'],
             ['url' => '/users/{id}', 'controller' => 'UserManagementController@update', 'route_name' => 'users.update', 'method' => 'PUT'],
@@ -49,6 +50,11 @@ class RouteSeeder extends Seeder
             ['url' => '/laporan', 'controller' => 'ReportController@index', 'route_name' => 'report.index', 'method' => 'GET'],
             ['url' => '/laporan/export-pdf', 'controller' => 'ReportController@exportPdf', 'route_name' => 'report.exportPdf', 'method' => 'GET'],
             ['url' => '/laporan/export-excel', 'controller' => 'ReportController@exportExcel', 'route_name' => 'report.exportExcel', 'method' => 'GET'],
+
+            ['url' => '/verifikasi/dokumen', 'controller' => 'VerificationController@index', 'route_name' => 'verification.index', 'method' => 'GET'],
+            ['url' => '/verifikasi/approve/{id}', 'controller' => 'VerificationController@approve', 'route_name' => 'verification.approve', 'method' => 'POST'],
+            ['url' => '/verifikasi/reject/{id}', 'controller' => 'VerificationController@reject', 'route_name' => 'verification.reject', 'method' => 'POST'],
+
 
             ['url' => '/balas-pesan', 'controller' => 'ReplyMessageController@index', 'route_name' => 'reply_message.index', 'method' => 'GET'],
             ['url' => '/balas-pesan/reply/{id}', 'controller' => 'ReplyMessageController@sendReply', 'route_name' => 'reply_message.sendReply', 'method' => 'POST'],
@@ -212,6 +218,12 @@ class RouteSeeder extends Seeder
                 'method' => 'GET'
             ],
             [
+                'url' => '/cari-mobil/detail/{id}',
+                'controller' => 'DetailMobilController@index',
+                'route_name' => 'dashboard.detail_mobil.index',
+                'method' => 'GET'
+            ],
+            [
                 'url' => '/booking-mobil/{id}',
                 'controller' => 'CariMobilController@createBooking',
                 'route_name' => 'cari_mobil.booking',
@@ -316,6 +328,48 @@ class RouteSeeder extends Seeder
                 'controller' => 'MidtransCallbackController@handle',
                 'route_name' => 'midtrans.callback',
                 'method' => 'POST'
+            ],
+            [
+                'url' => '/drivers',
+                'controller' => 'DriverController@index',
+                'route_name' => 'drivers.index',
+                'method' => 'GET'
+            ],
+            [
+                'url' => '/drivers/assign',
+                'controller' => 'DriverController@assign',
+                'route_name' => 'drivers.assign',
+                'method' => 'POST'
+            ],
+            [
+                'url' => '/drivers/{id}',
+                'controller' => 'DriverController@update',
+                'route_name' => 'drivers.update',
+                'method' => 'PUT'
+            ],
+            [
+                'url' => '/drivers/cancel-job',
+                'controller' => 'DriverController@cancelJob',
+                'route_name' => 'drivers.cancel_job',
+                'method' => 'POST'
+            ],
+            [
+                'url' => '/tasks',
+                'controller' => 'TaskController@index',
+                'route_name' => 'tasks.index',
+                'method' => 'GET'
+            ],
+            [
+                'url' => '/tasks/{id}/status',
+                'controller' => 'TaskController@updateStatus',
+                'route_name' => 'tasks.update_status',
+                'method' => 'POST'
+            ],
+            [
+                'url' => '/tasks/history',
+                'controller' => 'TaskController@history',
+                'route_name' => 'tasks.history',
+                'method' => 'GET'
             ],
         ];
 

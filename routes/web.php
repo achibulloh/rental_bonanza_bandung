@@ -11,6 +11,11 @@ use App\Http\Controllers\GoogleController;
 use App\Http\Controllers\CarController;
 use App\Http\Controllers\BookingFlowController;
 use App\Http\Controllers\BookingOfflineController;
+use App\Http\Controllers\ReportController;
+use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SerahTerimaController;
+use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\ForgotPasswordController;
 
 /*
 |--------------------------------------------------------------------------
@@ -25,25 +30,53 @@ use App\Http\Controllers\BookingOfflineController;
 
 // Index
 Route::controller(IndexController::class)->middleware('guest')->group(function () {
-    Route::get('/', 'index')->name('index');
-    Route::get('/allmobil', 'index_mobil')->name('index_mobil');
-    Route::get('/detail_mobil', 'detail_mobil')->name('detail_mobil');
+    Route::GET('/', 'index')->name('index');
+    Route::GET('/allmobil', 'index_mobil')->name('index_mobil');
+    Route::GET('/detail_mobil', 'detail_mobil')->name('detail_mobil');
     Route::post('/search-car', 'search')->name('index.search');
+    Route::GET('/jenis-layanan', 'layanan')->name('index.layanan');
+    Route::GET('/garasi-speed', 'speedwash')->name('index.garasispeed');
+    Route::GET('/poolnanza', 'poolnanza')->name('index.poolnanza');
 });
 
 // Auth
 Route::controller(AuthController::class)->middleware('guest')->group(function () {
+    // Login
     Route::get('/login', 'login')->name('login');
     Route::post('/auth-prosses-login', 'auth_prosses_login')->name('auth_prosses_login');
+
+    // OTP Routes
+    Route::get('/verify-otp', 'showVerifyOtp')->name('otp.verify');
+    Route::get('/otp/resend', 'resendOtp')->name('otp.resend');
+    Route::post('/verify-otp', 'processVerifyOtp')->name('otp.process');
+
+    // Register
     Route::get('/register', 'register')->name('register');
     Route::post('/auth-prosses-register', 'auth_prosses_register')->name('auth_prosses_register');
 });
+
 Route::controller(GoogleController::class)->middleware('guest')->group(function() {
+    // Login Auth with Google
     Route::get('/auth/google/login', 'loginToGoogle')->name('auth.google.login');
+    // Register Auth with Google
     Route::get('/auth/google/register', 'registerToGoogle')->name('auth.google.register');
     Route::get('/auth/google/callback', 'handleGoogleCallback')->name('handleGoogleCallback');
 });
 
+Route::controller(ForgotPasswordController::class)->middleware('guest')->group(function() {
+    // Forgot Password
+    // 1. Halaman Input Email/Phone (URL TETAP SAMA)
+    Route::get('/lupa-password', 'showRequestForm')->name('password.request');
+    Route::post('/lupa-password', 'sendOtp')->name('password.email');
+
+    // 2. Halaman Input OTP (BARU - Diperlukan untuk input kode 4 digit)
+    Route::get('/verifikasi-otp', 'showVerifyForm')->name('password.verify');
+    Route::post('/verifikasi-otp', 'processVerify')->name('password.verify.process');
+    Route::get('/reset-session-lupa-pass', 'resetSession')->name('password.reset.session');
+    // 3. Halaman Ganti Password Baru (BARU - Tanpa Token URL panjang)
+    Route::get('/reset-password-baru', 'showChangeForm')->name('password.reset.form');
+    Route::post('/reset-password-baru', 'processChange')->name('password.update');
+});
 // Route::get('/check-in', function () {
 //     return view('dashboard.serah_terima.checkin.index');
 // });

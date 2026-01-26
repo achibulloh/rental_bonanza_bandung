@@ -96,4 +96,23 @@ class IndexController extends Controller
             'end_date' => $end
         ]);
     }
+
+    // Fungsi Jenis Layanan dari Halaman Depan
+    public function layanan()
+    {
+        // Logika detail mobil (nanti bisa ditambahkan id di parameter)
+        return view('index.layanan');
+    }
+    // Fungsi Speedwash dari Halaman Depan
+    public function speedwash()
+    {
+        // Logika detail mobil (nanti bisa ditambahkan id di parameter)
+        return view('index.speedwash');
+    }
+    // Fungsi Poolnanza dari Halaman Depan
+    public function poolnanza()
+    {
+        // Logika detail mobil (nanti bisa ditambahkan id di parameter)
+        return view('index.poolnanza');
+    }
 }

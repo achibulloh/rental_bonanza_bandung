@@ -33,4 +33,9 @@ class Booking extends Model
     {
         return $this->hasOne(DetailBooking::class);
     }
+    // Relasi ke Driver
+    public function driver()
+    {
+        return $this->belongsTo(User::class, 'driver_id');
+    }
 }

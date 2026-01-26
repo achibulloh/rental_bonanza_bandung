@@ -24,10 +24,16 @@
             margin-left: var(--sidebar-width);
             padding: 30px 40px;
             background: #fff;
+            margin-right: -100px; /* Settingan Laptop */
             min-height: 100vh;
             transition: all 0.3s ease;
             display: flex;
             flex-direction: column;
+        }
+
+        .content-wrapper {
+            max-width: 100%;
+            margin-left: -215px; /* Settingan Laptop */
         }
 
         /* --- HEADER & SEARCH --- */
@@ -196,10 +202,34 @@
         .btn-close-custom:hover { background: var(--primary-hover); transform: rotate(90deg); }
 
         .btn-close-header { background: none; border: none; font-size: 1.5rem; color: #fff; cursor: pointer; }
+        /* Update Responsive untuk Card Body */
+        .card-body-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr; /* Membagi 50:50 Kiri dan Kanan */
+            gap: 30px;
+        }
 
+        /* Responsif HP: Kembali ke Stack (Atas-Bawah) */
+        @media (max-width: 992px) {
+            .card-body-grid {
+                grid-template-columns: 1fr; /* Jadi 1 Kolom */
+                gap: 20px;
+            }
+            /* Hilangkan border kanan saat di HP */
+            .card-body-grid > div:first-child {
+                border-right: none !important;
+                border-bottom: 1px dashed #eee;
+                padding-right: 0 !important;
+                padding-bottom: 20px;
+            }
+            .card-body-grid > div:last-child {
+                padding-left: 0 !important;
+            }
+        }
         /* RESPONSIF */
         @media (max-width: 992px) {
-            .main-content { margin-left: 0; padding: 20px; }
+            .main-content { margin: 0; padding: 20px; width: 100%; }
+            .content-wrapper { margin-left: 0 !important; width: 100%; }
             .card-body-grid { grid-template-columns: 1fr; }
             .header-actions { justify-content: flex-start; }
             .filter-tabs { width: 100%; overflow-x: auto; }
@@ -211,8 +241,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
-
     <div class="page-header">
         <div class="page-title">
             <h1>📋 Verifikasi Booking</h1>
@@ -262,62 +290,156 @@
 
             @if($type != 'hidden')
             <div class="booking-card item-card" data-type="{{ $type }}">
+
+                {{-- === HEADER CARD === --}}
                 <div class="card-top">
-                    <div>
-                        <h4 style="margin:0; font-weight:700;">{{ $booking->car->brand->name ?? '' }} {{ $booking->car->name }}</h4>
-                        <span style="font-size:0.85rem; color:#888;">ID: <strong>{{ $booking->booking_code }}</strong></span>
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        {{-- Icon Mobil Kecil di Header --}}
+                        <div style="width:40px; height:40px; background:#f0f2f5; border-radius:8px; display:flex; align-items:center; justify-content:center;">
+                            <i class="fas fa-car text-secondary"></i>
+                        </div>
+                        <div>
+                            <h4 style="margin:0; font-weight:700; color:var(--text-dark); font-size:1.05rem;">
+                                {{ $booking->car->brand->name ?? '' }} {{ $booking->car->name }}
+                            </h4>
+                            <span style="font-size:0.8rem; color:#888;">ID: <strong>{{ $booking->booking_code }}</strong></span>
+                        </div>
                     </div>
                     <div>
                         @if($type == 'booking')
-                            <span class="badge bg-primary">Perlu Persetujuan</span>
+                            <span class="badge bg-primary text-dark" style="font-weight:600;">Perlu Persetujuan</span>
                         @else
-                            <span class="badge bg-success">Cek Bukti Bayar</span>
+                            <span class="badge bg-success" style="font-weight:600;">Cek Bukti Bayar</span>
                         @endif
                     </div>
                 </div>
 
+                {{-- === BODY CARD (GRID 2 KOLOM) === --}}
                 <div class="card-body-grid">
-                    <div class="user-box">
-                        <div class="avatar">{{ substr($booking->user->name, 0, 1) }}</div>
-                        <div>
-                            <div style="font-weight:700;">{{ $booking->user->name }}</div>
-                            <div style="font-size:0.9rem; color:#666;">{{ $booking->user->phone }}</div>
+
+                    {{-- KOLOM KIRI: USER & DOKUMEN --}}
+                    <div style="border-right: 1px solid #f0f0f0; padding-right: 20px;">
+
+                        {{-- Info User --}}
+                        <div class="user-box" style="display:flex; align-items:center; gap:12px; margin-bottom: 20px; text-align:left; padding:0; background:transparent; border:none;">
+                            <div class="avatar" style="margin:0; width:45px; height:45px; font-size:1.1rem;">
+                                {{ substr($booking->user->name, 0, 1) }}
+                            </div>
+                            <div>
+                                <div style="font-weight:700; color:#333;">{{ $booking->user->name }}</div>
+                                <div style="font-size:0.85rem; color:#666;">{{ $booking->user->phone }}</div>
+                            </div>
                         </div>
+
+                        {{-- Divider Label --}}
+                        <div style="font-size: 0.75rem; font-weight:700; color:#aaa; text-transform:uppercase; margin-bottom:10px; letter-spacing:0.5px;">
+                            Dokumen Kelengkapan
+                        </div>
+
+                        {{-- DOKUMEN (MENGGUNAKAN STYLE INFO-GRID) --}}
+                        @if($booking->user->documents && $booking->user->documents->count() > 0)
+                            <div class="info-grid">
+                                @foreach($booking->user->documents as $doc)
+                                    <div class="info-item" style="background:#fafafa; padding:8px 10px; border-radius:8px; border:1px solid #eee;">
+                                        {{-- Baris 1: Label & Status Icon --}}
+                                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:4px;">
+                                            <label style="margin:0; cursor:pointer;">
+                                                {{ str_replace('_', ' ', $doc->document_type) }}
+                                            </label>
+                                            @if($doc->status == 'verified')
+                                                <i class="fas fa-check-circle text-success" title="Valid" style="font-size:0.9rem;"></i>
+                                            @elseif($doc->status == 'rejected')
+                                                <i class="fas fa-times-circle text-danger" title="Ditolak" style="font-size:0.9rem;"></i>
+                                            @else
+                                                <i class="fas fa-clock text-warning" title="Menunggu" style="font-size:0.9rem;"></i>
+                                            @endif
+                                        </div>
+
+                                        {{-- Baris 2: Link Lihat --}}
+                                        <a href="{{ asset('storage/'.$doc->file_path) }}" target="_blank" style="font-size:0.85rem; font-weight:600; text-decoration:none; color:var(--primary-dark); display:flex; align-items:center; gap:5px;">
+                                            <i class="fas fa-external-link-alt" style="font-size:0.75rem;"></i> Lihat File
+                                        </a>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @else
+                            {{-- Alert Jika Kosong --}}
+                            <div style="padding:10px; background:#fff5f5; border:1px solid #feb2b2; border-radius:8px; color:#c53030; font-size:0.85rem; display:flex; align-items:center; gap:8px;">
+                                <i class="fas fa-exclamation-circle"></i>
+                                <span>User belum upload dokumen.</span>
+                            </div>
+                        @endif
                     </div>
-                    <div>
+
+                    {{-- KOLOM KANAN: INFO BOOKING --}}
+                    <div style="padding-left: 10px;">
+                        <div style="font-size: 0.75rem; font-weight:700; color:#aaa; text-transform:uppercase; margin-bottom:15px; letter-spacing:0.5px;">
+                            Detail Sewa
+                        </div>
+
                         <div class="info-grid">
-                            <div class="info-item"><div><label>Jadwal</label><span>{{ \Carbon\Carbon::parse($booking->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d M Y') }}</span></div></div>
-                            <div class="info-item"><div><label>Lokasi</label><span>{{ Str::limit($booking->pickup_location, 15) }}</span></div></div>
-                            <div class="info-item"><div><label>Plat</label><span>{{ $booking->car->license_plate }}</span></div></div>
+                            <div class="info-item">
+                                <label><i class="far fa-calendar-alt me-1"></i> Jadwal</label>
+                                <span>{{ \Carbon\Carbon::parse($booking->start_date)->format('d M') }} - {{ \Carbon\Carbon::parse($booking->end_date)->format('d M Y') }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label><i class="fas fa-map-marker-alt me-1"></i> Lokasi</label>
+                                <span title="{{ $booking->pickup_location }}">{{ Str::limit($booking->pickup_location, 18) }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label><i class="fas fa-car-side me-1"></i> Plat</label>
+                                <span style="background:#eee; padding:2px 6px; border-radius:4px; font-size:0.85rem;">{{ $booking->car->license_plate }}</span>
+                            </div>
+                            <div class="info-item">
+                                <label><i class="fas fa-wallet me-1"></i> Metode</label>
+                                <span>{{ ucfirst($booking->payment_method) }}</span>
+                            </div>
                         </div>
 
                         @if($type == 'payment')
-                        <div style="margin-top:15px; padding:12px; background:#f0fff4; border:1px solid #d1e7dd; border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
-                            <div class="d-flex align-items-center gap-2 text-success fw-bold"><i class="fas fa-receipt"></i> Bukti Transfer Masuk</div>
-                            <button class="btn-base btn-success-custom px-3 py-1" style="font-size:0.85rem;" onclick="openCustomModal('modalPayment{{ $booking->id }}')"><i class="fas fa-eye"></i> Cek & Validasi</button>
+                        <div style="margin-top:20px; padding:12px; background:#f0fff4; border:1px solid #d1e7dd; border-radius:8px; display:flex; align-items:center; justify-content:space-between;">
+                            <div class="d-flex align-items-center gap-2 text-success fw-bold" style="font-size:0.9rem;">
+                                <i class="fas fa-receipt"></i> Bukti Transfer
+                            </div>
+                            <button class="btn-base btn-success-custom px-3 py-1" style="font-size:0.8rem;" onclick="openCustomModal('modalPayment{{ $booking->id }}')">
+                                <i class="fas fa-search-plus"></i> Cek
+                            </button>
                         </div>
                         @endif
                     </div>
                 </div>
 
+                {{-- === FOOTER CARD === --}}
                 <div class="card-footer">
-                    <div><span style="display:block; font-size:0.85rem; color:#888;">Total Transaksi</span><span class="price-tag">Rp {{ number_format($booking->grand_total, 0, ',', '.') }}</span></div>
+                    <div>
+                        <span style="display:block; font-size:0.8rem; color:#888;">Total Transaksi</span>
+                        <span class="price-tag">Rp {{ number_format($booking->grand_total, 0, ',', '.') }}</span>
+                    </div>
                     <div class="action-group d-flex gap-2">
                         @if($type == 'booking')
                             @can('approval.reject')
                                 <button class="btn-base btn-danger-outline" onclick="openCustomModal('modalReject{{ $booking->id }}')"><i class="fas fa-times"></i> Tolak</button>
                             @endcan
+
                             @can('approval.approve')
-                            <form action="{{ route('approval.approve_booking', $booking->id) }}" method="POST">
-                                @csrf
-                                <button type="submit" class="btn-base btn-primary-custom"><i class="fas fa-check"></i> Terima Booking</button>
-                            </form>
+                                {{-- Logic: Disable tombol jika dokumen user kosong --}}
+                                @if($booking->user->documents->isEmpty())
+                                    <button type="button" class="btn-base" style="background:#e0e0e0; color:#888; cursor:not-allowed;" title="Dokumen User Belum Lengkap">
+                                        <i class="fas fa-lock"></i> Terima
+                                    </button>
+                                @else
+                                    <form action="{{ route('approval.approve_booking', $booking->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn-base btn-primary-custom"><i class="fas fa-check"></i> Terima Booking</button>
+                                    </form>
+                                @endif
                             @endcan
                         @endif
+
                         @if($type == 'payment')
-                             @can('approval.reject')
+                            @can('approval.reject')
                                 <button class="btn-base btn-danger-outline" onclick="openCustomModal('modalReject{{ $booking->id }}')"><i class="fas fa-times"></i> Tolak Bukti</button>
-                             @endcan
+                            @endcan
                         @endif
                     </div>
                 </div>
@@ -452,8 +574,6 @@
         <h3 id="emptyStateTitle">Tidak ada data persetujuan</h3>
         <p>Semua permintaan pada kategori ini sudah diproses.</p>
     </div>
-
-</main>
 
 <script>
     // --- 1. FILTER TABS & EMPTY STATE LOGIC ---

@@ -226,7 +226,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
 
     <div class="header-detail">
         <a href="{{ route('riwayat_booking.index') }}" class="btn-back"><i class="fas fa-arrow-left"></i></a>
@@ -410,7 +409,6 @@
         </div>
 
     </div>
-</main>
 
 @if($booking->status == 'completed' && !$booking->review)
 <div id="reviewModal" class="modal-overlay">

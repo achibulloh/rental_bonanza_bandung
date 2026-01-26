@@ -121,6 +121,34 @@ class MenuSeeder extends Seeder
                 'icon' => 'fas fa-key',
                 'order' => 15
             ],
+            [
+                'name' => 'Driver',
+                'url' => '/drivers',
+                'route_name' => 'drivers.index',
+                'icon' => 'fas fa-id-card',
+                'order' => 16
+            ],
+            [
+                'name' => 'Daftar Tugas',
+                'url' => '/tasks',
+                'route_name' => 'tasks.index',
+                'icon' => 'fas fa-clipboard-list',
+                'order' => 17
+            ],
+            [
+                'name' => 'Riwayat Tugas',
+                'url' => '/tasks/history',
+                'route_name' => 'tasks.history',
+                'icon' => 'fas fa-history',
+                'order' => 18
+            ],
+            [
+                'name' => 'Verifikasi Dokumen',
+                'url' => '/verifikasi/dokumen',
+                'route_name' => 'verification.index',
+                'icon' => 'fas fa-id-card',
+                'order' => 19
+            ],
         ];
 
         foreach ($menus as $menu) {

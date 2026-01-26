@@ -111,7 +111,6 @@
 @endsection
 
 @section('content')
-    <main class="main-content">
 
         {{-- Pesan Error Validasi --}}
         @if ($errors->any())
@@ -363,7 +362,6 @@
                 </div>
             </div>
         </form>
-    </main>
 
     {{-- MODAL SIGNATURE (Hidden) --}}
     <div id="signatureModal" class="custom-modal">

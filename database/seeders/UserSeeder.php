@@ -16,6 +16,7 @@ class UserSeeder extends Seeder
         $ownerRole = Role::where('name', 'owner')->first();
         $staffRole = Role::where('name', 'staff')->first();
         $custRole  = Role::where('name', 'customer')->first();
+        $driverRole = Role::where('name', 'driver')->first();
 
         // 2. Buat User untuk masing-masing Role
         $users = [
@@ -52,6 +53,15 @@ class UserSeeder extends Seeder
                 'password' => Hash::make('password'),
                 'role_id' => $custRole->id,
                 'phone' => '089988776655',
+                'avatar' => null,
+                'is_active' => true,
+            ],
+            [
+                'name' => 'Driver Setia',
+                'email' => 'driver@bonanza.com',
+                'password' => Hash::make('password'),
+                'role_id' => $driverRole->id,
+                'phone' => '089181716151',
                 'avatar' => null,
                 'is_active' => true,
             ],

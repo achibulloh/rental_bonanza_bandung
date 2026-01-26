@@ -49,7 +49,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
     <div style="margin-bottom: 25px;">
         <h1 style="font-size: 24px; font-weight: 700; margin: 0;">Transaksi Offline</h1>
     </div>
@@ -87,7 +86,6 @@
             </table>
         </div>
     </div>
-</main>
 
 <div id="bookingModal" class="modal">
     <div class="modal-content">

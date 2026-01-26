@@ -20,6 +20,7 @@ class RoleSeeder extends Seeder
             ['name' => 'owner', 'label' => 'Owner', 'description' => 'Pemilik Bisnis'],
             ['name' => 'staff', 'label' => 'Pegawai', 'description' => 'Staff Operasional'],
             ['name' => 'customer', 'label' => 'Customer', 'description' => 'Pelanggan Rental'],
+            ['name' => 'driver', 'label' => 'Driver', 'description' => 'Supir Mobil'],
         ];
 
         foreach ($roles as $role) {

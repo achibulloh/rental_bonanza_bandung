@@ -22,7 +22,8 @@ return new class extends Migration
                 $table->date('birth_date')->nullable();
                 $table->enum('gender', ['male', 'female'])->nullable();
                 $table->string('avatar')->nullable();          // Foto Profil
-                $table->boolean('is_active')->default(true);   // Status Akun (Aktif/Nonaktif)
+                $table->string('otp')->nullable();
+                $table->boolean('is_active')->default(0);    // Status Akun (Aktif/Nonaktif)
                 $table->string('google_id')->nullable();       // ID Google (untuk login Google)
                 $table->timestamp('email_verified_at')->nullable();
                 $table->string('password');

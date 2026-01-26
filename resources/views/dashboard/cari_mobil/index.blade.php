@@ -49,11 +49,6 @@
 @endsection
 
 @section('content')
-    <main class="main-content">
-        <div class="mobile-header">
-            <a href="/" style="color:var(--text-dark); font-weight:700; text-decoration:none;">Bonanza Rental</a>
-            <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-        </div>
         <h1 class="page-title" style="margin-bottom:20px; font-size:24px; font-weight:700;">Cari Mobil</h1>
 
         <div class="filter-card">
@@ -127,7 +122,7 @@
                         <hr style="border:0; border-top:1px solid #eee; margin:10px 0 20px 0;">
 
                         <div class="card-actions">
-                            <a href="#" class="btn-card btn-outline">Detail</a>
+                            <a href="{{ route('dashboard.detail_mobil.index', $car->id) }}" class="btn-card btn-outline">Detail</a>
                             {{-- PERBAIKAN: Link Booking juga otomatis bawa tanggal Start & End (+1 hari) --}}
                             <a href="{{ route('booking.index', $car->id) }}?start={{ request('start_date', date('Y-m-d')) }}&end={{ request('end_date', date('Y-m-d', strtotime('+1 day'))) }}" class="btn-card btn-fill">Booking</a>
                         </div>
@@ -140,7 +135,6 @@
                 </div>
             @endforelse
         </div>
-    </main>
 
     {{-- Script Tambahan: Update otomatis End Date jika Start Date berubah --}}
     <script>

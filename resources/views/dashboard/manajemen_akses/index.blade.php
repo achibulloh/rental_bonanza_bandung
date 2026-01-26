@@ -161,17 +161,159 @@
                 position: sticky; left: 0; background-color: #fff; z-index: 5;
                 box-shadow: 2px 0 5px rgba(0,0,0,0.05); border-right: 1px solid #eee;
             }
+
         }
     </style>
+    <style>
+        /* === 1. OVERLAY FULL SCREEN (FIXED POSITION) === */
+        .modal-overlay-custom {
+            display: none; /* Hidden by default */
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.5); /* Gelap transparan */
+            z-index: 9999; /* Paling atas */
+            backdrop-filter: blur(4px); /* Efek blur belakang */
+
+            /* Flexbox untuk menengahkan Modal persis di tengah */
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay-custom.show {
+            display: flex !important;
+        }
+
+        /* === 2. KOTAK MODAL (CONTAINER) === */
+        .modal-box-custom {
+            background: #fff;
+            width: 90%;
+            max-width: 850px;       /* Lebar maksimal Desktop */
+            max-height: 85vh;       /* Tinggi maksimal 85% layar (KUNCI AGAR TIDAK KEPOTONG) */
+            border-radius: 12px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            display: flex;
+            flex-direction: column; /* Susun Header-Body-Footer ke bawah */
+            overflow: hidden;       /* Sembunyikan luapan container utama */
+            position: relative;
+            animation: slideDown 0.3s ease-out;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateY(-20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* === 3. HEADER & FOOTER (STICKY/DIAM) === */
+        .modal-header-sticky {
+            padding: 15px 20px;
+            border-bottom: 1px solid #eee;
+            background: #fff;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0; /* Mencegah header mengecil */
+        }
+        .modal-header-sticky h3 { margin: 0; font-size: 1.2rem; color: #333; }
+        .btn-close-modal { background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #999; }
+
+        .modal-footer-sticky {
+            padding: 15px 20px;
+            border-top: 1px solid #eee;
+            background: #fff;
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            flex-shrink: 0; /* Mencegah footer mengecil */
+        }
+
+        /* === 4. BODY AREA (SCROLLABLE) === */
+        .modal-form-flex {
+            display: flex;
+            flex-direction: column;
+            overflow: hidden; /* Penting */
+            height: 100%;
+        }
+
+        .modal-body-scroll {
+            padding: 20px;
+            overflow-y: auto;  /* HANYA BAGIAN INI YANG BISA DI-SCROLL */
+            background-color: #f8f9fa;
+            flex-grow: 1;      /* Mengisi sisa ruang */
+        }
+
+        /* === 5. CONTENT STYLING (GRID MENU) === */
+        .grid-list-numbered {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* 2 Kolom */
+            gap: 15px;
+            list-style: none; padding: 0; margin: 0;
+            counter-reset: menu-rank;
+        }
+
+        .grid-item {
+            position: relative;
+            background: #fff;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 12px 15px;
+            display: flex; align-items: center; gap: 15px;
+            cursor: grab;
+            user-select: none;
+            counter-increment: menu-rank;
+            transition: all 0.2s;
+        }
+
+        .grid-item:hover { border-color: var(--primary); transform: translateY(-2px); box-shadow: 0 4px 10px rgba(0,0,0,0.05); }
+        .grid-item:active { cursor: grabbing; }
+
+        /* Badge Nomor Urut */
+        .grid-item::before {
+            content: counter(menu-rank);
+            position: absolute; top: -8px; left: -8px;
+            width: 24px; height: 24px;
+            background: var(--primary); color: #000;
+            font-weight: bold; font-size: 0.8rem;
+            border-radius: 50%; border: 2px solid #fff;
+            display: flex; justify-content: center; align-items: center;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+            z-index: 2;
+        }
+
+        /* Icon & Text */
+        .drag-handle { color: #ccc; cursor: grab; font-size: 1.1rem; }
+        .item-content { flex: 1; display: flex; align-items: center; gap: 12px; overflow: hidden; }
+        .icon-wrapper {
+            width: 35px; height: 35px; background: #eee;
+            border-radius: 6px; display: flex; justify-content: center; align-items: center;
+            color: #555; flex-shrink: 0;
+        }
+        .text-wrapper { display: flex; flex-direction: column; overflow: hidden; }
+        .item-name { font-weight: 600; color: #333; font-size: 0.95rem; }
+        .item-url { font-size: 0.75rem; color: #888; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+        /* Style Alert Info */
+        .info-alert {
+            background: #e1f5fe; border: 1px solid #b3e5fc; color: #0277bd;
+            padding: 10px 15px; border-radius: 6px; font-size: 0.9rem;
+            margin-bottom: 20px; display: flex; align-items: center; gap: 8px;
+        }
+
+        /* Buttons */
+        .btn-modal-cancel { padding: 10px 20px; border: none; background: #eee; border-radius: 6px; cursor: pointer; color: #555; font-weight: 600; }
+        .btn-modal-save { padding: 10px 20px; border: none; background: var(--primary); border-radius: 6px; cursor: pointer; color: #000; font-weight: 600; }
+        .btn-modal-save:hover { filter: brightness(0.9); }
+
+        /* === 6. RESPONSIVE MOBILE === */
+        @media (max-width: 768px) {
+            .grid-list-numbered { grid-template-columns: 1fr; } /* 1 Kolom di HP */
+            .modal-box-custom { width: 95%; max-height: 90vh; }
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
 @endsection
 
 @section('content')
-<main class="main-content">
-
-    <div class="mobile-header" style="display:none; justify-content:space-between; margin-bottom:20px;">
-        <a href="/" style="font-weight:700; color:#333; text-decoration:none;">Bonanza</a>
-        <div onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-    </div>
 
     @if(session('success'))
         <div style="background: #e6fcf5; color: #0ca678; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
@@ -232,7 +374,8 @@
                 <div class="header-left"><i class="fas fa-list" style="color:var(--primary);"></i> Menu</div>
                 <div class="header-actions">
                     <div class="search-sm"><i class="fas fa-search"></i><input type="text" id="menuSearch" placeholder="Cari menu..."></div>
-                    <button class="btn-sm" style="background:#eee; color:#333;" onclick="openModal('modalAddMenu')"><i class="fas fa-plus"></i></button>
+                    <button class="btn-sm" style="background:#eee; color:#333;" onclick="openModal('modalAddMenu')"><i class="fas fa-plus"></i> Tambah Menu</button>
+                    <button class="btn-sm" style="background:#eee; color:#333;" onclick="openModal('modalReorderMenu')"><i class="fas fa-plus"></i> Ururtan Menu</button>
                 </div>
             </div>
 
@@ -406,8 +549,6 @@
         </div>
     </div>
 
-</main>
-
 <div id="modalAddRole" class="modal-overlay">
     <div class="modal-box">
         <div class="modal-header"><h3>Tambah Role Baru</h3><button class="btn-close-modal" onclick="closeModal('modalAddRole')">&times;</button></div>
@@ -434,6 +575,55 @@
                 <div class="modal-form-group"><label class="modal-label">Icon</label><input type="text" name="icon" class="modal-input" placeholder="fas fa-home"></div>
             </div>
             <div class="modal-footer"><button type="button" class="btn-modal-cancel" onclick="closeModal('modalAddMenu')">Batal</button><button type="submit" class="btn-modal-save">Simpan</button></div>
+        </form>
+    </div>
+</div>
+
+{{-- Reorder Menu Modal --}}
+<div id="modalReorderMenu" class="modal-overlay-custom">
+    <div class="modal-box-custom style-wide">
+
+        {{-- HEADER (Sticky) --}}
+        <div class="modal-header-sticky">
+            <h3><i class="fas fa-sort-numeric-down"></i> Atur Urutan Menu</h3>
+            <button type="button" class="btn-close-modal" onclick="closeModal('modalReorderMenu')">&times;</button>
+        </div>
+
+        {{-- FORM WRAPPER --}}
+        <form action="{{ route('menus.reorder') }}" method="POST" class="modal-form-flex">
+            @csrf
+
+            {{-- BODY (Scrollable Area) --}}
+            <div class="modal-body-scroll">
+                <div class="info-alert">
+                    <i class="fas fa-info-circle"></i> Geser kartu untuk mengubah urutan menu.
+                </div>
+
+                <ul id="reorderList" class="grid-list-numbered">
+                    @foreach($menus->sortBy('order') as $m)
+                        <li data-id="{{ $m->id }}" class="grid-item">
+                            <div class="drag-handle">
+                                <i class="fas fa-grip-lines"></i>
+                            </div>
+                            <div class="item-content">
+                                <div class="icon-wrapper">
+                                    <i class="{{ $m->icon }}"></i>
+                                </div>
+                                <div class="text-wrapper">
+                                    <span class="item-name">{{ $m->name }}</span>
+                                    <small class="item-url">{{ $m->url }}</small>
+                                </div>
+                            </div>
+                        </li>
+                    @endforeach
+                </ul>
+            </div>
+
+            {{-- FOOTER (Sticky) --}}
+            <div class="modal-footer-sticky">
+                <button type="button" class="btn-modal-cancel" onclick="closeModal('modalReorderMenu')">Batal</button>
+                <button type="submit" class="btn-modal-save">Simpan Perubahan</button>
+            </div>
         </form>
     </div>
 </div>
@@ -552,6 +742,95 @@
 
 @section('script')
 <script>
+    // FUNGSI MODAL BARU
+    function openModal(id) {
+        const el = document.getElementById(id);
+        if(el) el.classList.add('show');
+    }
+
+    function closeModal(id) {
+        const el = document.getElementById(id);
+        if(el) el.classList.remove('show');
+    }
+
+    // Close click outside
+    window.onclick = function(event) {
+        // Cek class custom overlay
+        if (event.target.classList.contains('modal-overlay-custom')) {
+            event.target.classList.remove('show');
+        }
+        // Cek class overlay lama (jika masih ada)
+        if (event.target.classList.contains('modal-overlay')) {
+            event.target.classList.remove('show');
+        }
+    }
+
+    // SCRIPT REORDER MENU DENGAN SORTABLEJS
+    document.addEventListener('DOMContentLoaded', function() {
+        // 1. Inisialisasi SortableJS
+        var el = document.getElementById('reorderList');
+        if (el) {
+            new Sortable(el, {
+                animation: 150,
+                ghostClass: 'sortable-ghost'
+            });
+        }
+
+        // 2. Handle Tombol Simpan
+        const formReorder = document.querySelector('#modalReorderMenu form');
+
+        if (formReorder) {
+            formReorder.addEventListener('submit', function(e) {
+                e.preventDefault(); // Matikan submit default
+
+                let orderIds = [];
+                // Ambil ID sesuai urutan visual
+                document.querySelectorAll('#reorderList li').forEach(function(item) {
+                    orderIds.push(item.getAttribute('data-id'));
+                });
+
+                // Ubah tombol jadi Loading
+                const btnSave = formReorder.querySelector('.btn-modal-save');
+                const oldText = btnSave.innerText;
+                btnSave.innerText = 'Menyimpan...';
+                btnSave.disabled = true;
+
+                // Kirim AJAX
+                fetch(formReorder.action, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('input[name="_token"]').value
+                    },
+                    body: JSON.stringify({ ids: orderIds })
+                })
+                .then(response => {
+                    if (!response.ok) throw new Error('Server Error');
+                    return response.json();
+                })
+                .then(data => {
+                    if (data.success) {
+                        // SUKSES: Langsung reload halaman.
+                        // Pesan "success" dari Controller akan otomatis muncul di alert hijau Anda.
+                        location.reload();
+                    } else {
+                        alert('Gagal menyimpan urutan.'); // Fallback jika gagal logic
+                        btnSave.innerText = oldText;
+                        btnSave.disabled = false;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Terjadi kesalahan koneksi.');
+                    btnSave.innerText = oldText;
+                    btnSave.disabled = false;
+                });
+            });
+        }
+    });
+</script>
+<script>
+
     // 1. Sidebar Toggle
     function toggleSidebar() {
         const sidebar = document.getElementById('sidebar');

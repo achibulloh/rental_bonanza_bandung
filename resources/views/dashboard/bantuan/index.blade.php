@@ -183,11 +183,6 @@
 @endsection
 
 @section('content')
-    <main class="main-content">
-        <div class="mobile-header">
-            <a href="/" style="color:var(--text-dark); font-weight:700; text-decoration:none;">Bonanza Rental</a>
-            <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-        </div>
 
         <h1 class="page-title">Bantuan & Kontak</h1>
 
@@ -431,7 +426,6 @@
                 </div>
             </div>
         </div>
-    </main>
 @endsection
 @section('script')
 <script>

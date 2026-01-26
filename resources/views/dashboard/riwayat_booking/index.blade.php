@@ -156,12 +156,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
-
-    <div class="mobile-header">
-        <a href="/" style="color:var(--text-dark); font-weight:700; text-decoration:none;">Bonanza Rental</a>
-        <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-    </div>
 
     <div class="page-header">
         <div>
@@ -342,8 +336,6 @@
             <a href="/" class="btn-act btn-primary" style="margin-top: 10px;">Cari Mobil Sekarang</a>
         </div>
     @endforelse
-
-</main>
 
 <div id="reviewModal" class="modal-overlay">
     <div class="modal-box">

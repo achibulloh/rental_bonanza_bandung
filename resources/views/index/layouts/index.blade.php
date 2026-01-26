@@ -442,7 +442,7 @@
             </div>
 
             <ul class="nav-links">
-                <li><a href="#">Beranda</a></li>
+                <li><a href="{{ route('index') }}">Beranda</a></li>
                 <li><a href="#armada">Mobil</a></li>
                 <li><a href="#layanan">Layanan</a></li>
                 <li><a href="#testimoni">Testimoni</a></li>
@@ -494,7 +494,7 @@
                     </div>
                 </div>
                 <div class="footer-col">
-                    <h4>Link Cepat</h4>
+                    <h4>Menu</h4>
                     <ul class="footer-links">
                         <li><a href="#">Beranda</a></li>
                         <li><a href="#armada">Daftar Mobil</a></li>
@@ -506,11 +506,10 @@
                 <div class="footer-col">
                     <h4>Layanan Kami</h4>
                     <ul class="footer-links">
-                        <li><a href="#">Rental Harian</a></li>
-                        <li><a href="#">Rental Bulanan</a></li>
-                        <li><a href="#">Rental + Driver</a></li>
-                        <li><a href="#">Paket Wisata</a></li>
-                        <li><a href="#">Corporate</a></li>
+                        <li><a href="{{ route('index.layanan') }}">Paket Rental</a></li>
+                        <li><a href="{{ route('index.garasispeed') }}">Garasi Speed</a></li>
+                        <li><a href="{{ route('index.poolnanza') }}">Poolnanza Billiard</a></li>
+                        <li><a href="#">Warbon</a></li>
                     </ul>
                 </div>
                 <div class="footer-col">

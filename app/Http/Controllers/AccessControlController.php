@@ -188,4 +188,29 @@ class AccessControlController extends Controller
 
         return back()->with('success', 'Matrix Izin Akses & Menu Sidebar berhasil diperbarui!');
     }
+
+        // App\Http\Controllers\MenuController.php
+
+    public function reorder(Request $request)
+    {
+        $request->validate([
+            'ids' => 'required|array',
+            'ids.*' => 'exists:menu,id',
+        ]);
+
+        foreach ($request->ids as $index => $id) {
+            // Update urutan
+            // Asumsi nama model Anda 'Menu'
+            \App\Models\Menu::where('id', $id)->update([
+                'order' => $index + 1
+            ]);
+        }
+
+        // === BAGIAN PENTING ===
+        // Simpan pesan ke session agar muncul di alert hijau blade setelah reload
+        // return back()->with('success', 'Urutan menu berhasil diperbarui!');
+        session()->flash('success', 'Urutan menu berhasil diperbarui!');
+
+        return response()->json(['success' => true]);
+    }
 }

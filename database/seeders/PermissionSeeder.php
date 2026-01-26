@@ -138,6 +138,22 @@ class PermissionSeeder extends Seeder
                 ['name' => 'serah_terima.index', 'label' => 'Lihat Menu Serah Terima'],
                 ['name' => 'serah_terima.process', 'label' => 'Proses Check-in & Check-out'],
             ],
+            // Q. Manajemen Driver
+            'drivers.index' => [
+                ['name' => 'drivers.index',  'label' => 'Lihat Menu Driver'],
+                ['name' => 'drivers.assign', 'label' => 'Assign Driver ke Booking'],
+                ['name' => 'drivers.update', 'label' => 'Edit Data Driver'],
+                ['name' => 'drivers.cancel', 'label' => 'Batalkan Pekerjaan Driver'],
+            ],
+            // R. Daftar Tugas (Task List)
+            'tasks.index' => [
+                ['name' => 'tasks.index',  'label' => 'Lihat Menu Tugas'],
+                ['name' => 'tasks.update', 'label' => 'Update Status Tugas (Mulai/Selesai)'],
+            ],
+            // S. Riwayat Tugas Driver
+            'tasks.history' => [
+                ['name' => 'tasks.history', 'label' => 'Lihat Riwayat Tugas Selesai'],
+            ],
         ];
 
         // 3. Loop dan Insert ke Database

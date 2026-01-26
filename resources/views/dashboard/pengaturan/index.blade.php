@@ -101,12 +101,6 @@
 @endsection
 
 @section('content')
-    <main class="main-content">
-
-        <div class="mobile-header">
-            <a href="/" style="color:var(--text-dark); font-weight:700; text-decoration:none;">{{ $settings['app_name'] ?? 'Bonanza Rental' }}</a>
-            <div class="hamburger" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
-        </div>
 
         @if(session('success'))
             <div style="background: #e6fcf5; color: #0ca678; padding: 15px; border-radius: 8px; margin-bottom: 20px; border:1px solid #63e6be;">
@@ -409,7 +403,6 @@
                 </div>
             </div>
         </form>
-    </main>
 @endsection
 
 @section('script')

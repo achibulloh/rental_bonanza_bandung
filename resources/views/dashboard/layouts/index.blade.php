@@ -161,6 +161,7 @@
 
             .main-content {
                 margin-left: 0;
+                margin-top: 30px;
                 width: 100%;
                 padding: 20px;
                 /* TAMBAHAN 2: Padding Top agar judul tidak ketutup header fixed */
@@ -213,7 +214,7 @@
 
     <header class="mobile-header">
         <a href="/" class="mobile-brand">
-            <i class="fas fa-car-side" style="color: var(--primary);"></i> Bonanza
+            <i class="fas fa-car-side" style="color: var(--primary);"></i> Bonanza Rental
         </a>
         <button class="toggle-btn" onclick="toggleSidebar()">
             <i class="fas fa-bars"></i>

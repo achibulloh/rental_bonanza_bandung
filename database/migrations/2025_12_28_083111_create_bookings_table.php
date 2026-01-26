@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('booking_code')->unique(); // Contoh: RMX-203392
             $table->foreignId('car_id')->constrained('cars');
             $table->foreignId('user_id')->constrained('users');
-
+            $table->foreignId('driver_id')->nullable()->constrained('users');
             // Data Sewa
             $table->date('start_date');
             $table->date('end_date');
@@ -51,6 +51,7 @@ return new class extends Migration
 
             // Type Booking: Online atau Offline
             $table->enum('booking_type', ['Online', 'Offline'])->default('Online');
+
 
 
             $table->timestamps();

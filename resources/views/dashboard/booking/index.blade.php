@@ -156,7 +156,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
 
     <div class="header-area" style="margin-bottom: 30px;">
         <h1 style="font-size: 1.8rem; font-weight: 700; margin-bottom: 5px;">Booking Mobil</h1>
@@ -382,7 +381,6 @@
             </div>
         </div>
     </div>
-</main>
 @if($step == 2)
 <div id="confirmationModal" class="modal-overlay">
     <div class="modal-box">

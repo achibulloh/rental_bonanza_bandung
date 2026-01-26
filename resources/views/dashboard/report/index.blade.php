@@ -182,7 +182,6 @@
 @endsection
 
 @section('content')
-<main class="main-content">
 
     {{-- HEADER --}}
     <div class="page-header">
@@ -370,7 +369,6 @@
             </div>
         </div>
     </div>
-</main>
 
 {{-- === JAVASCRIPT === --}}
 <script>
